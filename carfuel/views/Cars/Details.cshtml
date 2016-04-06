@@ -1,0 +1,12 @@
+﻿@using CarFuel.Models
+@model Car
+@{
+    ViewBag.Title = "Details Of " + Model.Model;
+}
+<h2>
+    Average consumption is <b>@(Model.AverageKmL?.ToString("n2"))</b> km/l
+</h2>
+
+
+
+
