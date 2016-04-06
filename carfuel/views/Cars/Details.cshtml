@@ -1,0 +1,21 @@
+﻿@using CarFuel.Models
+@model Car
+@{
+    ViewBag.Title = "Details Of " + Model.Model;
+}
+<h2></h2>
+
+    @if(Model.AverageKmL == null) {
+        <div>
+            Not has enough data to calculate consumption rate.
+            Please add more fill up</div >
+    }
+    else
+    {
+       @: Average consumption is <b>@(Model.AverageKmL?.ToString("n2"))</b> km / l
+                    }
+
+
+
+
+
