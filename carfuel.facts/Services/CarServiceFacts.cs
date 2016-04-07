@@ -9,16 +9,17 @@ using CarFuel.Services;
 using Xunit;
 using Should;
 using Xunit.Abstractions;
-
+using Moq;
 namespace CarFuel.Facts.Services
 {
     public class SharedService
     {
         public CarService CarService { get; set; }
-
+        public FakeCarDb Db { get; set; }
         public SharedService()
         {
-            CarService = new CarService(new FakeCarDb());
+            Db = new FakeCarDb();
+            CarService = new CarService(Db);
         }
     }
     [CollectionDefinition("collection1")]
@@ -31,8 +32,9 @@ namespace CarFuel.Facts.Services
         [Collection("collection1")]
         public class AddCarMethod
         {
-            private ICarDb db;
+            //private ICarDb db;
             private CarService s;
+            private FakeCarDb db;
             private ITestOutputHelper output;
             public AddCarMethod(ITestOutputHelper output,SharedService service  )
             {
@@ -41,6 +43,7 @@ namespace CarFuel.Facts.Services
 
                 this.output = output;
                 s = service.CarService;
+                db = service.Db;
                 output.WriteLine("ctor");
 
             }
@@ -48,6 +51,12 @@ namespace CarFuel.Facts.Services
             [Fact]
             public void AddSingleCar()
             {
+                var mock = new Mock<ICarDb>();
+
+                mock.Setup(db => db.Add(It.IsAny<Car>())).Returns((Car car) => car);
+                var service = new CarService(mock.Object);
+
+
                 //var db = new FakeCarDb();
                 //var s = new CarService(db);
                 var c = new Car();
@@ -55,16 +64,19 @@ namespace CarFuel.Facts.Services
                 c.Model = "Civic";
                 var userId = Guid.NewGuid();
 
-                var c2 = s.AddCar(c, userId);
+                var c2 = service.AddCar(c, userId);
 
                 Assert.NotNull(c2);
                 Assert.Equal(c2.Make, c.Make);
                 Assert.Equal(c2.Model, c.Model);
 
-                var cars = s.GetCarsByMember(userId);
+                mock.Verify(db => db.Add(It.IsAny<Car>()), Times.Once);
 
-                Assert.Equal(1, cars.Count());
-                Assert.Contains(cars, x => x.OwnerId == userId);
+               // Assert.True(db.AddMethodHasCalled);
+                //var cars = s.GetCarsByMember(userId);
+
+                //Assert.Equal(1, cars.Count());
+                //Assert.Contains(cars, x => x.OwnerId == userId);
             }
 
         }
